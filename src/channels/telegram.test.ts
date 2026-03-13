@@ -563,16 +563,23 @@ describe('TelegramChannel', () => {
 
   describe('non-text messages', () => {
     it('processes photo with image vision', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(Buffer.from('fake-image'), { status: 200 }),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(Buffer.from('fake-image'), { status: 200 }),
+        );
 
       const opts = createTestOpts();
       const channel = new TelegramChannel('test-token', opts);
       await channel.connect();
 
       const ctx = createMediaCtx({
-        extra: { photo: [{ file_id: 'small', width: 90 }, { file_id: 'large', width: 800 }] },
+        extra: {
+          photo: [
+            { file_id: 'small', width: 90 },
+            { file_id: 'large', width: 800 },
+          ],
+        },
       });
       await triggerMediaMessage('message:photo', ctx);
 
@@ -580,15 +587,19 @@ describe('TelegramChannel', () => {
       expect(processImage).toHaveBeenCalled();
       expect(opts.onMessage).toHaveBeenCalledWith(
         'tg:100200300',
-        expect.objectContaining({ content: '[Image: attachments/img-test.jpg]' }),
+        expect.objectContaining({
+          content: '[Image: attachments/img-test.jpg]',
+        }),
       );
       fetchSpy.mockRestore();
     });
 
     it('processes photo with caption', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(Buffer.from('fake-image'), { status: 200 }),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(Buffer.from('fake-image'), { status: 200 }),
+        );
       vi.mocked(processImage).mockResolvedValueOnce({
         content: '[Image: attachments/img-test.jpg] Look at this',
         relativePath: 'attachments/img-test.jpg',
@@ -600,28 +611,40 @@ describe('TelegramChannel', () => {
 
       const ctx = createMediaCtx({
         caption: 'Look at this',
-        extra: { photo: [{ file_id: 'small', width: 90 }, { file_id: 'large', width: 800 }] },
+        extra: {
+          photo: [
+            { file_id: 'small', width: 90 },
+            { file_id: 'large', width: 800 },
+          ],
+        },
       });
       await triggerMediaMessage('message:photo', ctx);
 
       expect(opts.onMessage).toHaveBeenCalledWith(
         'tg:100200300',
-        expect.objectContaining({ content: '[Image: attachments/img-test.jpg] Look at this' }),
+        expect.objectContaining({
+          content: '[Image: attachments/img-test.jpg] Look at this',
+        }),
       );
       fetchSpy.mockRestore();
     });
 
     it('falls back to placeholder when photo download fails', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(null, { status: 500 }),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(null, { status: 500 }));
 
       const opts = createTestOpts();
       const channel = new TelegramChannel('test-token', opts);
       await channel.connect();
 
       const ctx = createMediaCtx({
-        extra: { photo: [{ file_id: 'small', width: 90 }, { file_id: 'large', width: 800 }] },
+        extra: {
+          photo: [
+            { file_id: 'small', width: 90 },
+            { file_id: 'large', width: 800 },
+          ],
+        },
       });
       await triggerMediaMessage('message:photo', ctx);
 
@@ -647,9 +670,11 @@ describe('TelegramChannel', () => {
     });
 
     it('transcribes voice messages', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(Buffer.from('fake-audio'), { status: 200 }),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(Buffer.from('fake-audio'), { status: 200 }),
+        );
 
       const opts = createTestOpts();
       const channel = new TelegramChannel('test-token', opts);
@@ -668,9 +693,11 @@ describe('TelegramChannel', () => {
     });
 
     it('falls back when voice transcription returns null', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(Buffer.from('fake-audio'), { status: 200 }),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(Buffer.from('fake-audio'), { status: 200 }),
+        );
       vi.mocked(transcribeAudioBuffer).mockResolvedValueOnce(null);
 
       const opts = createTestOpts();
@@ -682,15 +709,17 @@ describe('TelegramChannel', () => {
 
       expect(opts.onMessage).toHaveBeenCalledWith(
         'tg:100200300',
-        expect.objectContaining({ content: '[Voice Message - transcription unavailable]' }),
+        expect.objectContaining({
+          content: '[Voice Message - transcription unavailable]',
+        }),
       );
       fetchSpy.mockRestore();
     });
 
     it('falls back when voice file download fails', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(null, { status: 500 }),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(null, { status: 500 }));
 
       const opts = createTestOpts();
       const channel = new TelegramChannel('test-token', opts);
@@ -701,16 +730,22 @@ describe('TelegramChannel', () => {
 
       expect(opts.onMessage).toHaveBeenCalledWith(
         'tg:100200300',
-        expect.objectContaining({ content: '[Voice Message - transcription unavailable]' }),
+        expect.objectContaining({
+          content: '[Voice Message - transcription unavailable]',
+        }),
       );
       fetchSpy.mockRestore();
     });
 
     it('falls back when voice transcription throws', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-        new Response(Buffer.from('fake-audio'), { status: 200 }),
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(
+          new Response(Buffer.from('fake-audio'), { status: 200 }),
+        );
+      vi.mocked(transcribeAudioBuffer).mockRejectedValueOnce(
+        new Error('API error'),
       );
-      vi.mocked(transcribeAudioBuffer).mockRejectedValueOnce(new Error('API error'));
 
       const opts = createTestOpts();
       const channel = new TelegramChannel('test-token', opts);
@@ -721,7 +756,9 @@ describe('TelegramChannel', () => {
 
       expect(opts.onMessage).toHaveBeenCalledWith(
         'tg:100200300',
-        expect.objectContaining({ content: '[Voice Message - transcription failed]' }),
+        expect.objectContaining({
+          content: '[Voice Message - transcription failed]',
+        }),
       );
       fetchSpy.mockRestore();
     });

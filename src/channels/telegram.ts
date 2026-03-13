@@ -98,8 +98,15 @@ export class TelegramChannel implements Channel {
       }
 
       // Store chat metadata for discovery
-      const isGroup = ctx.chat.type === 'group' || ctx.chat.type === 'supergroup';
-      this.opts.onChatMetadata(chatJid, timestamp, chatName, 'telegram', isGroup);
+      const isGroup =
+        ctx.chat.type === 'group' || ctx.chat.type === 'supergroup';
+      this.opts.onChatMetadata(
+        chatJid,
+        timestamp,
+        chatName,
+        'telegram',
+        isGroup,
+      );
 
       // Only deliver full message for registered groups
       const group = this.opts.registeredGroups()[chatJid];
@@ -142,8 +149,15 @@ export class TelegramChannel implements Channel {
         'Unknown';
       const caption = ctx.message.caption ? ` ${ctx.message.caption}` : '';
 
-      const isGroup = ctx.chat.type === 'group' || ctx.chat.type === 'supergroup';
-      this.opts.onChatMetadata(chatJid, timestamp, undefined, 'telegram', isGroup);
+      const isGroup =
+        ctx.chat.type === 'group' || ctx.chat.type === 'supergroup';
+      this.opts.onChatMetadata(
+        chatJid,
+        timestamp,
+        undefined,
+        'telegram',
+        isGroup,
+      );
       this.opts.onMessage(chatJid, {
         id: ctx.message.message_id.toString(),
         chat_jid: chatJid,
@@ -167,8 +181,15 @@ export class TelegramChannel implements Channel {
         ctx.from?.id?.toString() ||
         'Unknown';
 
-      const isGroup = ctx.chat.type === 'group' || ctx.chat.type === 'supergroup';
-      this.opts.onChatMetadata(chatJid, timestamp, undefined, 'telegram', isGroup);
+      const isGroup =
+        ctx.chat.type === 'group' || ctx.chat.type === 'supergroup';
+      this.opts.onChatMetadata(
+        chatJid,
+        timestamp,
+        undefined,
+        'telegram',
+        isGroup,
+      );
 
       const caption = ctx.message.caption || '';
       let content = caption ? `[Photo] ${caption}` : '[Photo]';
@@ -186,10 +207,16 @@ export class TelegramChannel implements Channel {
           const result = await processImage(buffer, groupDir, caption);
           if (result) {
             content = result.content;
-            logger.info({ chatJid, bytes: buffer.length }, 'Processed Telegram image');
+            logger.info(
+              { chatJid, bytes: buffer.length },
+              'Processed Telegram image',
+            );
           }
         } else {
-          logger.warn({ chatJid, status: resp.status }, 'Failed to download Telegram photo');
+          logger.warn(
+            { chatJid, status: resp.status },
+            'Failed to download Telegram photo',
+          );
         }
       } catch (err) {
         logger.warn({ err, chatJid }, 'Telegram image processing failed');
@@ -218,8 +245,15 @@ export class TelegramChannel implements Channel {
         ctx.from?.id?.toString() ||
         'Unknown';
 
-      const isGroup = ctx.chat.type === 'group' || ctx.chat.type === 'supergroup';
-      this.opts.onChatMetadata(chatJid, timestamp, undefined, 'telegram', isGroup);
+      const isGroup =
+        ctx.chat.type === 'group' || ctx.chat.type === 'supergroup';
+      this.opts.onChatMetadata(
+        chatJid,
+        timestamp,
+        undefined,
+        'telegram',
+        isGroup,
+      );
 
       let content = '[Voice message]';
       try {
@@ -228,16 +262,25 @@ export class TelegramChannel implements Channel {
         const resp = await fetch(url);
         if (resp.ok) {
           const buffer = Buffer.from(await resp.arrayBuffer());
-          logger.info({ chatJid, bytes: buffer.length }, 'Downloaded Telegram voice message');
+          logger.info(
+            { chatJid, bytes: buffer.length },
+            'Downloaded Telegram voice message',
+          );
           const transcript = await transcribeAudioBuffer(buffer);
           if (transcript) {
             content = `[Voice: ${transcript.trim()}]`;
-            logger.info({ chatJid, length: transcript.length }, 'Transcribed Telegram voice message');
+            logger.info(
+              { chatJid, length: transcript.length },
+              'Transcribed Telegram voice message',
+            );
           } else {
             content = '[Voice Message - transcription unavailable]';
           }
         } else {
-          logger.error({ chatJid, status: resp.status }, 'Failed to download Telegram voice file');
+          logger.error(
+            { chatJid, status: resp.status },
+            'Failed to download Telegram voice file',
+          );
           content = '[Voice Message - transcription unavailable]';
         }
       } catch (err) {
